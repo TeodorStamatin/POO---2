@@ -1,5 +1,10 @@
 package fileio.input;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+
 public final class CommandInput {
     private String command;
     private String username;
@@ -11,12 +16,73 @@ public final class CommandInput {
     private Integer playlistId; // pentru add/remove song
     private String playlistName; // pentru create playlist
     private Integer seed; // pentru shuffle
+    private Integer age; // pentru varsta userului
+    private String city; // pentru orasul userului
+    private String name; // pentru numele userului
+    private Integer releaseYear; // pentru anul de lansare al unui song
+    private String description; // pentru descriere
+    @Getter
+    @Setter
+    private ArrayList<SongInput> songs; // pentru lista de melodii
+    @Getter
+    @Setter
+    private String date; // pentru data
+    @Getter
+    @Setter
+    private Integer price;
+    @Getter
+    @Setter
+    private ArrayList<EpisodeInput> episodes;
+    @Getter
+    @Setter
+    private String nextPage;
+
 
     public CommandInput() {
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getReleaseYear() {
+        return releaseYear;
+    }
+
+    public void setReleaseYear(Integer releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getType() {
         return type;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public void setType(final String type) {

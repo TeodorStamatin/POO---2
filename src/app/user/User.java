@@ -10,8 +10,13 @@ import app.player.Player;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.searchBar.SearchBar;
+import app.searchBar.SearchBarPage;
 import app.utils.Enums;
 import lombok.Getter;
+import java.util.stream.Collectors;
+import app.audio.Collections.Album;
+import app.Admin;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +37,20 @@ public class User {
     private ArrayList<Song> likedSongs;
     @Getter
     private ArrayList<Playlist> followedPlaylists;
+    @Getter
     private final Player player;
+    @Getter
     private final SearchBar searchBar;
+    private final SearchBarPage searchBarPage;
     private boolean lastSearched;
+    @Getter
+    public boolean connectionStatus = true;
+    @Getter
+    @Setter
+    public String page = "HomePage";
+    public String lastSearchType = "";
+    @Getter
+    public String lastLoaded = "";
 
     /**
      * Instantiates a new User.
@@ -52,6 +68,7 @@ public class User {
         followedPlaylists = new ArrayList<>();
         player = new Player();
         searchBar = new SearchBar(username);
+        searchBarPage = new SearchBarPage(username);
         lastSearched = false;
     }
 
@@ -65,13 +82,23 @@ public class User {
     public ArrayList<String> search(final Filters filters, final String type) {
         searchBar.clearSelection();
         player.stop();
+        lastSearchType = type;
+        lastLoaded = "";
 
         lastSearched = true;
         ArrayList<String> results = new ArrayList<>();
-        List<LibraryEntry> libraryEntries = searchBar.search(filters, type);
+        if(type.equals("host") || type.equals("artist")) {
+            List<String> tmp = searchBarPage.search(filters, type);
 
-        for (LibraryEntry libraryEntry : libraryEntries) {
-            results.add(libraryEntry.getName());
+            for (String string : tmp) {
+                results.add(string);
+            }
+        } else {
+            List<LibraryEntry> libraryEntries = searchBar.search(filters, type);
+
+            for (LibraryEntry libraryEntry : libraryEntries) {
+                results.add(libraryEntry.getName());
+            }
         }
         return results;
     }
@@ -89,13 +116,25 @@ public class User {
 
         lastSearched = false;
 
-        LibraryEntry selected = searchBar.select(itemNumber);
+        if(lastSearchType.equals("host") || lastSearchType.equals("artist")) {
+            String selected = searchBarPage.select(itemNumber);
 
-        if (selected == null) {
-            return "The selected ID is too high.";
+            if (selected == null) {
+                return "The selected ID is too high.";
+            }
+
+            page = selected;
+
+            return "Successfully selected %s's page.".formatted(selected);
+        } else {
+            LibraryEntry selected = searchBar.select(itemNumber);
+
+            if (selected == null) {
+                return "The selected ID is too high.";
+            }
+
+            return "Successfully selected %s.".formatted(selected.getName());
         }
-
-        return "Successfully selected %s.".formatted(selected.getName());
     }
 
     /**
@@ -114,6 +153,7 @@ public class User {
         }
 
         player.setSource(searchBar.getLastSelected(), searchBar.getLastSearchType());
+        lastLoaded = searchBar.getLastSelected().getName();
         searchBar.clearSelection();
 
         player.pause();
@@ -480,4 +520,105 @@ public class User {
     public void simulateTime(final int time) {
         player.simulatePlayer(time);
     }
+
+    public String switchConnectionStatus() {
+        connectionStatus = !connectionStatus;
+        return "%s has changed status successfully." .formatted(username);
+    }
+
+    public String printCurrentPage() {
+        StringBuilder output = new StringBuilder();
+
+        switch (page) {
+            case "HomePage" -> {
+                output.append("Liked songs:\n\t[").append(likedSongsToString()).append("]\n\n");
+                output.append("Followed playlists:\n\t[").append(followedPlaylistsToString()).append("]");
+            }
+            case "LikedContentPage" -> {
+                output.append("Liked Songs:\n\t").append(likedSongsDetailsToString()).append("\n\n");
+                output.append("Followed Playlists:\n\t").append(followedPlaylistsDetailsToString()).append("\n");
+            }
+            default -> {
+                switch (lastSearchType) {
+                    case "artist":
+                        Artist artist = Admin.getArtist(page);
+
+                        String albumsString = albumsToString(artist);
+                        String merchDetailsString = merchDetailsToString(artist);
+                        String eventDetailsString = eventDetailsToString(artist);
+
+                        output.append("Albums:\n\t[").append(albumsString).append("]\n\n");
+                        output.append("Merch:\n\t[").append(merchDetailsString).append("]\n\n");
+                        output.append("Events:\n\t[").append(eventDetailsString).append("]");
+
+                        break;
+                    case "host":
+                        Host host = Admin.getHost(page);
+
+//                        String podcastsString = podcastsToString(host);
+//                        String announcementsDetailsString = announcementsDetailsToString(host);
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return output.toString();
+    }
+
+    private String likedSongsToString() {
+        return likedSongs.stream()
+                .map(AudioFile::getName)
+                .collect(Collectors.joining(", "));
+    }
+
+    private String likedSongsDetailsToString() {
+        return likedSongs.stream()
+                .map(song -> song.getName() + " - " + song.getArtist())
+                .collect(Collectors.joining(", "));
+    }
+
+    private String followedPlaylistsToString() {
+        return followedPlaylists.stream()
+                .map(Playlist::getName)
+                .collect(Collectors.joining(", "));
+    }
+
+    private String followedPlaylistsDetailsToString() {
+        return followedPlaylists.stream()
+                .map(playlist -> playlist.getName() + " - " + playlist.getOwner())
+                .collect(Collectors.joining(", "));
+    }
+
+    private String albumsToString(Artist artist) {
+        return artist.getAlbums().stream()
+                .map(Album::getName)
+                .collect(Collectors.joining(", "));
+    }
+
+    private String merchDetailsToString(Artist artist) {
+        return artist.getMerch().stream()
+                .map(merchandise -> merchandise.getName() + " - " + merchandise.getPrice() + ":\n\t" + merchandise.getDescription())
+                .collect(Collectors.joining(", "));
+    }
+
+    private String eventDetailsToString(Artist artist) {
+        return artist.getEvents().stream()
+                .map(event -> event.getName() + " - " + event.getDate() + ":\n\t" + event.getDescription())
+                .collect(Collectors.joining(", "));
+    }
+
+//    private String podcastsToString(Host host) {
+//        return host.getPodcasts().stream()
+//                .map(Podcast::getName)
+//                .collect(Collectors.joining(", "));
+//    }
+//
+//    private String announcementsDetailsToString(Host host) {
+//        return host.getAnnouncements().stream()
+//                .map(announcement -> announcement.getName() + "\n\t" + announcement.getDescription())
+//                .collect(Collectors.joining(", "));
+//    }
 }

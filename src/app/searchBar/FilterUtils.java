@@ -150,6 +150,11 @@ public final class FilterUtils {
         return result;
     }
 
+    public static List<LibraryEntry> filterByDescription(final List<LibraryEntry> entries,
+                                                                final String user) {
+        return filter(entries, entry -> entry.isVisibleToUser(user));
+    }
+
     @FunctionalInterface
     private interface FilterCriteria {
         /**

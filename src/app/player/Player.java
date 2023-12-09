@@ -74,6 +74,8 @@ public final class Player {
             return new PlayerSource(Enums.PlayerSourceType.PLAYLIST, (AudioCollection) entry);
         } else if ("podcast".equals(type)) {
             return createPodcastSource((AudioCollection) entry, bookmarks);
+        } else if ("album".equals(type)) {
+            return new PlayerSource(Enums.PlayerSourceType.ALBUM, (AudioCollection) entry);
         }
 
         return null;
@@ -124,7 +126,8 @@ public final class Player {
             source.generateShuffleOrder(seed);
         }
 
-        if (source.getType() == Enums.PlayerSourceType.PLAYLIST) {
+        if (source.getType() == Enums.PlayerSourceType.PLAYLIST ||
+                source.getType() == Enums.PlayerSourceType.ALBUM) {
             shuffle = !shuffle;
             if (shuffle) {
                 source.updateShuffleIndex();
@@ -167,15 +170,17 @@ public final class Player {
     public void simulatePlayer(final int time) {
         int elapsedTime = time;
         if (!paused) {
-            while (elapsedTime >= source.getDuration()) {
-                elapsedTime -= source.getDuration();
-                next();
-                if (paused) {
-                    break;
+            if(source != null) {
+                while (elapsedTime >= source.getDuration()) {
+                    elapsedTime -= source.getDuration();
+                    next();
+                    if (paused) {
+                        break;
+                    }
                 }
-            }
-            if (!paused) {
-                source.skip(-elapsedTime);
+                if (!paused) {
+                    source.skip(-elapsedTime);
+                }
             }
         }
     }

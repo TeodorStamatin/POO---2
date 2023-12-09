@@ -12,6 +12,7 @@ public final class FiltersInput {
     private String artist;
     private String owner; // pentru search playlist si podcast
     private String followers; // pentru search playlist -> followers
+    private String description; // pentru search album -> description
 
     public FiltersInput() {
     }
@@ -82,6 +83,10 @@ public final class FiltersInput {
 
     public String getFollowers() {
         return followers;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public void setFollowers(final String followers) {
