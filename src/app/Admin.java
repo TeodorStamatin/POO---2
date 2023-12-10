@@ -13,10 +13,11 @@ import fileio.input.*;
 import lombok.Getter;
 import lombok.experimental.NonFinal;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import app.audio.Collections.Album;
 
 /**
  * The type Admin.
@@ -110,6 +111,14 @@ public final class Admin {
         return playlists;
     }
 
+    public static List<Album> getAllAlbums() {
+        List<Album> albums = new ArrayList<>();
+        for (Artist artist : artists) {
+            albums.addAll(artist.getAlbums());
+        }
+        return albums;
+    }
+
     /**
      * Gets user.
      *
@@ -183,6 +192,22 @@ public final class Admin {
             count++;
         }
         return topPlaylists;
+    }
+
+    public static List<String> getTop5Albums() {
+        List<Album> allAlbums = getAllAlbums();
+
+        Collections.sort(allAlbums, Comparator
+                .<Album, Integer>comparing(album -> album.getSongs().stream().mapToInt(Song::getLikes).sum())
+                .reversed()
+                .thenComparing(Album::getName));
+
+        List<String> topAlbums = allAlbums.stream()
+                .limit(5)
+                .map(Album::getName)
+                .collect(Collectors.toList());
+
+        return topAlbums;
     }
 
     public static List<String> getOnlineUsers() {
@@ -487,6 +512,17 @@ public final class Admin {
 
         for (User user : users) {
             if (user.getUsername().equals(username)) {
+                if(user.getPlayer().getCurrentAudioFile() != null) {
+                    return "%s can't be deleted.".formatted(username);
+                }
+                List<Playlist> playlists = user.getPlaylists();
+                for(Playlist playlist : playlists) {
+                    for(User user1 : users) {
+                        if(user1.lastLoaded.equals(playlist.getName()) && user1.getPlayer().getCurrentAudioFile() != null) {
+                            return "%s can't be deleted.".formatted(username);
+                        }
+                    }
+                }
                 for (User user1 : users) {
                     Iterator<Playlist> iterator = user1.getFollowedPlaylists().iterator();
                     while (iterator.hasNext()) {
@@ -496,7 +532,7 @@ public final class Admin {
                         }
                     }
                 }
-                List<Playlist> playlists = user.getFollowedPlaylists();
+                playlists = user.getFollowedPlaylists();
                 for (Playlist playlist : playlists) {
                     playlist.decreaseFollowers();
                 }
@@ -537,6 +573,19 @@ public final class Admin {
                             Admin.removeSong(song.getName());
                         }
                     }
+                    List<Playlist> playlists = user.getFollowedPlaylists();
+                    for(Playlist playlist : playlists) {
+                        if(playlist.getName().equals(curr)) {
+                            for(Song song : playlist.getSongs()) {
+                                if(user.getPlayer().getCurrentAudioFile() != null) {
+                                    if(song.getName().equals(user.getPlayer().getCurrentAudioFile().getName())) {
+                                        return "%s can't be deleted.".formatted(username);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
                 artists.remove(artist);
                 return "%s was successfully deleted.".formatted(username);

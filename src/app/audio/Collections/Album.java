@@ -1,4 +1,6 @@
 package app.audio.Collections;
+
+
 import app.audio.Files.AudioFile;
 import lombok.Getter;
 import app.audio.Files.Song;
@@ -41,6 +43,10 @@ public class Album extends AudioCollection {
     @Override
     public AudioFile getTrackByIndex(final int index) {
         return songs.get(index);
+    }
+
+    public List<Song> getSongs() {
+        return songs;
     }
 
 }

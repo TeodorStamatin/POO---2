@@ -753,4 +753,15 @@ public final class CommandRunner {
         objectNode.put("message", objectMapper.valueToTree(message));
         return objectNode;
     }
+
+    public static ObjectNode getTop5Albums(final CommandInput commandInput) {
+        List<String> songs = Admin.getTop5Albums();
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("result", objectMapper.valueToTree(songs));
+
+        return objectNode;
+    }
 }

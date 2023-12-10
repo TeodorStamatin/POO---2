@@ -16,6 +16,7 @@ public final class Song extends AudioFile {
     private final String genre;
     private final Integer releaseYear;
     private final String artist;
+    @Getter
     private Integer likes;
 
     /**
