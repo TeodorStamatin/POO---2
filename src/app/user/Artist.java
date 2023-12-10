@@ -31,8 +31,6 @@ public class Artist {
     private String city;
     @Getter
     private List<Album> albums;
-    @Getter
-    public boolean connectionStatus = true;
 
     public Artist(final String username, final int age, final String city) {
         this.username = username;

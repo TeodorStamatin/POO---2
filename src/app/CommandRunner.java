@@ -511,6 +511,9 @@ public final class CommandRunner {
                 break;
             }
             case "host" -> {
+                Host host = new Host(commandInput.getUsername(), commandInput.getAge(),
+                                     commandInput.getCity());
+                message = Admin.addHost(host);
                 break;
             }
         }
@@ -540,6 +543,18 @@ public final class CommandRunner {
         return objectNode;
     }
 
+    public static ObjectNode addPodcast(final CommandInput commandInput) {
+
+        String message = Admin.addPodcast(commandInput);
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
     /**
      * Show album.
      *
@@ -551,6 +566,22 @@ public final class CommandRunner {
         Artist artist = Admin.getArtist(commandInput.getUsername());
 
         results = artist.showAlbums(commandInput.getUsername());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("result", objectMapper.valueToTree(results));
+
+        return objectNode;
+    }
+
+    public static ObjectNode showPodcasts(final CommandInput commandInput) {
+
+        List<ObjectNode> results;
+        Host host = Admin.getHost(commandInput.getUsername());
+
+        results = host.showPodcasts(commandInput.getUsername());
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
@@ -603,6 +634,30 @@ public final class CommandRunner {
         return objectNode;
     }
 
+    public static ObjectNode addAnnouncement(final CommandInput commandInput) {
+
+        String message = Admin.addAnnouncement(commandInput.getName(), commandInput.getUsername(), commandInput.getDescription());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
+    public static ObjectNode removeAnnouncement(final CommandInput commandInput) {
+
+        String message = Admin.removeAnnouncement(commandInput.getName(), commandInput.getUsername());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
     /**
      * Add event.
      *
@@ -640,6 +695,32 @@ public final class CommandRunner {
     public static ObjectNode deleteUser(final CommandInput commandInput) {
 
         String message = Admin.deleteUser(commandInput.getUsername());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
+    public static ObjectNode removeAlbum(final CommandInput commandInput) {
+
+        String message = Admin.removeAlbum(commandInput.getUsername(), commandInput.getName());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
+    public static ObjectNode changePage(final CommandInput commandInput) {
+
+        User user = Admin.getUser(commandInput.getUsername());
+
+        String message = user.changePage(commandInput.getNextPage());
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());

@@ -47,7 +47,7 @@ public class User {
     public boolean connectionStatus = true;
     @Getter
     @Setter
-    public String page = "HomePage";
+    public String page = "Home";
     public String lastSearchType = "";
     @Getter
     public String lastLoaded = "";
@@ -526,23 +526,33 @@ public class User {
         return "%s has changed status successfully." .formatted(username);
     }
 
+    public String changePage(final String page) {
+        if(page.equals("Home")) {
+            this.page = page;
+            return "%s accessed Home successfully.".formatted(username);
+        } else if(page.equals("LikedContent")) {
+            this.page = page;
+            return "%s accessed LikedContent successfully.".formatted(username);
+        } else {
+            return "%s is trying to access a non-existent page.".formatted(username);
+        }
+    }
+
     public String printCurrentPage() {
         StringBuilder output = new StringBuilder();
 
         switch (page) {
-            case "HomePage" -> {
+            case "Home" -> {
                 output.append("Liked songs:\n\t[").append(likedSongsToString()).append("]\n\n");
                 output.append("Followed playlists:\n\t[").append(followedPlaylistsToString()).append("]");
             }
-            case "LikedContentPage" -> {
-                output.append("Liked Songs:\n\t").append(likedSongsDetailsToString()).append("\n\n");
-                output.append("Followed Playlists:\n\t").append(followedPlaylistsDetailsToString()).append("\n");
+            case "LikedContent" -> {
+                output.append("Liked songs:\n\t[").append(likedSongsDetailsToString()).append("]\n\n");
+                output.append("Followed playlists:\n\t[").append(followedPlaylistsDetailsToString()).append("]");
             }
             default -> {
-                switch (lastSearchType) {
-                    case "artist":
-                        Artist artist = Admin.getArtist(page);
-
+                for (Artist artist : Admin.getArtists()) {
+                    if (artist.getUsername().equals(page)) {
                         String albumsString = albumsToString(artist);
                         String merchDetailsString = merchDetailsToString(artist);
                         String eventDetailsString = eventDetailsToString(artist);
@@ -552,15 +562,18 @@ public class User {
                         output.append("Events:\n\t[").append(eventDetailsString).append("]");
 
                         break;
-                    case "host":
-                        Host host = Admin.getHost(page);
+                    }
+                }
+                for (Host host : Admin.getHosts()) {
+                    if (host.getUsername().equals(page)) {
+                        String podcastsString = podcastsToString(host);
+                        String announcementsDetailsString = announcementsDetailsToString(host);
 
-//                        String podcastsString = podcastsToString(host);
-//                        String announcementsDetailsString = announcementsDetailsToString(host);
+                        output.append("Podcasts:\n\t[").append(podcastsString).append("]\n\n");
+                        output.append("Announcements:\n\t[").append(announcementsDetailsString).append("]");
 
                         break;
-                    default:
-                        break;
+                    }
                 }
             }
         }
@@ -610,15 +623,19 @@ public class User {
                 .collect(Collectors.joining(", "));
     }
 
-//    private String podcastsToString(Host host) {
-//        return host.getPodcasts().stream()
-//                .map(Podcast::getName)
-//                .collect(Collectors.joining(", "));
-//    }
-//
-//    private String announcementsDetailsToString(Host host) {
-//        return host.getAnnouncements().stream()
-//                .map(announcement -> announcement.getName() + "\n\t" + announcement.getDescription())
-//                .collect(Collectors.joining(", "));
-//    }
+    private String podcastsToString(Host host) {
+        return host.getPodcasts().stream()
+                .map(podcast -> podcast.getName() + ":\n\t[" +
+                        podcast.getEpisodes().stream()
+                                .map(episode -> episode.getName() + " - " + episode.getDescription())
+                                .collect(Collectors.joining(", ")) + "]\n")
+                .collect(Collectors.joining(", "));
+    }
+
+    private String announcementsDetailsToString(Host host) {
+        return host.getAnnouncements().stream()
+                .map(announcement -> announcement.getName() + ":\n\t" + announcement.getDescription() + "\n")
+                .collect(Collectors.joining(", "));
+    }
+
 }

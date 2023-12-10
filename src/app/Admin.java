@@ -11,6 +11,7 @@ import app.user.Host;
 import app.user.User;
 import fileio.input.*;
 import lombok.Getter;
+import lombok.experimental.NonFinal;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -229,10 +230,6 @@ public final class Admin {
 
     }
 
-    public static void addHost(final Host host) {
-        hosts.add(host);
-    }
-
     public static List<Artist> getArtists() {
         return new ArrayList<>(artists);
     }
@@ -303,15 +300,60 @@ public final class Admin {
 
         for (Host host : hosts) {
             if (host.getUsername().equals(username)) {
-                return "The username %s is not an artist".formatted(username);
+                return "%s is not an artist".formatted(username);
             }
         }
         for (User user : users) {
             if (user.getUsername().equals(username)) {
-                return "The username %s is not an artist".formatted(username);
+                return "%s is not an artist".formatted(username);
             }
         }
-        return "The username %s is not an artist".formatted(username);
+        return "The username %s doesn't exist.".formatted(username);
+    }
+
+    public static String addPodcast(final CommandInput commandInput) {
+
+        String username = commandInput.getUsername();
+        String podcastName = commandInput.getName();
+
+
+        for(Host host : hosts) {
+            if (host.getUsername().equals(username)) {
+                if(host.podcastExists(podcastName)) {
+                    return "%s has another podcast with the same name.".formatted(username);
+                }
+
+                List<Episode> episodeList = new ArrayList<>();
+
+                List<EpisodeInput> episodeInputList = commandInput.getEpisodes();
+                for (EpisodeInput episodeInput : episodeInputList) {
+                    Episode new_episode = new Episode(episodeInput.getName(), episodeInput.getDuration(),
+                            episodeInput.getDescription());
+                    for(Episode episode : episodeList) {
+                        if(episode.getName().equals(new_episode.getName())) {
+                            return "%s has the same episode in this podcast.".formatted(username);
+                        }
+                    }
+                    episodeList.add(new_episode);
+                }
+                Podcast podcast = new Podcast(podcastName, username, episodeList);
+                host.podcasts.add(podcast);
+                podcasts.add(podcast);
+                return "%s has added new podcast successfully.".formatted(username);
+            }
+        }
+
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+        for (Artist artist : artists) {
+            if (artist.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
     }
 
     public static String addEvent(final String name, final String date, final String description, final String username) {
@@ -356,6 +398,48 @@ public final class Admin {
         return "The username %s doesn't exist.".formatted(username);
     }
 
+    public static String addAnnouncement(final String name, final String username, final String description) {
+
+        for (User user : Admin.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+        for (Artist artist : Admin.getArtists()) {
+            if (artist.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+        for (Host host : Admin.getHosts()) {
+            if (host.getUsername().equals(username)) {
+                String message = host.addAnnouncement(name, description);
+                return message;
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
+    }
+
+    public static String removeAnnouncement(final String name, final String username) {
+
+        for (User user : Admin.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+        for (Artist artist : Admin.getArtists()) {
+            if (artist.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+        for (Host host : Admin.getHosts()) {
+            if (host.getUsername().equals(username)) {
+                String message = host.removeAnnouncement(name);
+                return message;
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
+    }
+
     public static List<Album> getAlbums() {
         List<Album> albums = new ArrayList<>();
         for (Artist artist : artists) {
@@ -382,6 +466,15 @@ public final class Admin {
 
         for (User user : users) {
             if (user.getUsername().equals(username)) {
+                for (User user1 : users) {
+                    Iterator<Playlist> iterator = user1.getFollowedPlaylists().iterator();
+                    while (iterator.hasNext()) {
+                        Playlist playlist = iterator.next();
+                        if (playlist.getOwner().equals(username)) {
+                            iterator.remove();
+                        }
+                    }
+                }
                 users.remove(user);
                 return "%s was successfully deleted.".formatted(username);
             }
@@ -404,7 +497,7 @@ public final class Admin {
                         }
                     }
                     if(user.getPage().equals(username)) {
-                        user.setPage("Home Page");
+                        user.setPage("Home");
                     }
                     Iterator<Song> iterator = user.getLikedSongs().iterator();
                     while (iterator.hasNext()) {
@@ -440,5 +533,84 @@ public final class Admin {
                 return;
             }
         }
+    }
+
+    public static String addHost(final Host host) {
+
+        for (Artist artist : artists) {
+            if (artist.getUsername().equals(host.getUsername())) {
+                return "The username %s is already taken.".formatted(host.getUsername());
+            }
+        }
+        for (Host host1 : hosts) {
+            if (host1.getUsername().equals(host.getUsername())) {
+                return "The username %s is already taken.".formatted(host.getUsername());
+            }
+        }
+        for (User user : users) {
+            if (user.getUsername().equals(host.getUsername())) {
+                return "The username %s is already taken.".formatted(host.getUsername());
+            }
+        }
+
+        hosts.add(host);
+        return "The username %s has been added successfully.".formatted(host.getUsername());
+
+    }
+
+    public static String removeAlbum(String username, String albumName) {
+
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return "%s is not an artist.".formatted(username);
+            }
+        }
+
+        for (Host host : hosts) {
+            if (host.getUsername().equals(username)) {
+                return "%s is not an artist.".formatted(username);
+            }
+        }
+
+        for (Artist artist : artists) {
+            if (artist.getUsername().equals(username)) {
+                for(User user : users) {
+                    String curr = user.lastLoaded;
+                    if(user.getPlayer().getCurrentAudioFile() != null) {
+                        for(Album album : artist.getAlbums()) {
+                            if(album.getName().equals(curr)) {
+                                return "%s can't delete this album.".formatted(username);
+                            }
+                            for(Song song : album.getSongs()) {
+                                if(song.getName().equals(curr)) {
+                                    return "%s can't delete this album.".formatted(username);
+                                }
+                            }
+                        }
+                    }
+                    Iterator<Song> iterator = user.getLikedSongs().iterator();
+                    while (iterator.hasNext()) {
+                        Song song = iterator.next();
+                        if (song.getAlbum().equals(albumName)) {
+                            iterator.remove();
+                        }
+                    }
+                    List<Song> list = Admin.getSongs();
+                    for(Song song : list) {
+                        if(song.getAlbum().equals(albumName)) {
+                            Admin.removeSong(song.getName());
+                        }
+                    }
+                }
+                for(Album album : artist.getAlbums()) {
+                    if(album.getName().equals(albumName)) {
+                        artist.getAlbums().remove(album);
+                        return "%s deleted the album successfully.".formatted(username);
+                    }
+                }
+                return "%s doesn't have an album with the given name.".formatted(username);
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
     }
 }

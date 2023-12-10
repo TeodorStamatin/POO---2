@@ -12,6 +12,15 @@ public final class Podcast extends AudioCollection {
         this.episodes = episodes;
     }
 
+    public boolean episodeExists(final String episodeName) {
+        for (Episode episode : episodes) {
+            if (episode.getName().equals(episodeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Episode> getEpisodes() {
         return episodes;
     }

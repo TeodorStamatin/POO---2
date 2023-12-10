@@ -160,6 +160,9 @@ public final class CommandInput {
     public void setSeed(final Integer seed) {
         this.seed = seed;
     }
+    public String getNextPage() {
+        return nextPage;
+    }
 
     @Override
     public String toString() {
