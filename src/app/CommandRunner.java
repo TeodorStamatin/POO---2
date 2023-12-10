@@ -676,6 +676,18 @@ public final class CommandRunner {
         return objectNode;
     }
 
+    public static ObjectNode removeEvent(final CommandInput commandInput) {
+
+        String message = Admin.removeEvent(commandInput.getName(), commandInput.getUsername());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
     /**
      * Gets all users.
      *
@@ -721,6 +733,18 @@ public final class CommandRunner {
         User user = Admin.getUser(commandInput.getUsername());
 
         String message = user.changePage(commandInput.getNextPage());
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", objectMapper.valueToTree(message));
+        return objectNode;
+    }
+
+    public static ObjectNode removePodcast(final CommandInput commandInput) {
+
+        String message = Admin.removePodcast(commandInput.getUsername(), commandInput.getName());
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());

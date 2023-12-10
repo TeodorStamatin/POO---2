@@ -1,6 +1,7 @@
 package app.user;
 
 import app.Admin;
+import app.utils.Announcement;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -79,6 +80,15 @@ public class Artist {
         return results;
     }
 
+    public Album getAlbumByName(final String albumName) {
+        for (Album album : this.albums) {
+            if (album.getName().equals(albumName)) {
+                return album;
+            }
+        }
+        return null;
+    }
+
     public String addEvent(final String name, final String date, final String description) {
         if(!validDate(date)) {
             return "Event for %s does not have a valid date.".formatted(this.username);
@@ -121,6 +131,16 @@ public class Artist {
             // Parsing failed or conversion to integer failed
             return false;
         }
+    }
+
+    public String removeEvent(final String name) {
+        for (Event event : this.getEvents()) {
+            if (event.getName().equals(name)) {
+                this.events.remove(event);
+                return "%s deleted the event successfully.".formatted(this.username);
+            }
+        }
+        return "%s doesn't have an event with the given name.".formatted(this.username);
     }
 
     public String addMerch(final String name, final Integer price, final String description) {

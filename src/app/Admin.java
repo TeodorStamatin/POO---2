@@ -440,6 +440,27 @@ public final class Admin {
         return "The username %s doesn't exist.".formatted(username);
     }
 
+    public static String removeEvent(final String name, final String username) {
+
+        for (Host host : Admin.getHosts()) {
+            if (host.getUsername().equals(username)) {
+                return "%s is not an artist.".formatted(username);
+            }
+        }
+        for (User user : Admin.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                return "%s is not an artist.".formatted(username);
+            }
+        }
+        for (Artist artist : Admin.getArtists()) {
+            if (artist.getUsername().equals(username)) {
+                String message = artist.removeEvent(name);
+                return message;
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
+    }
+
     public static List<Album> getAlbums() {
         List<Album> albums = new ArrayList<>();
         for (Artist artist : artists) {
@@ -475,6 +496,10 @@ public final class Admin {
                         }
                     }
                 }
+                List<Playlist> playlists = user.getFollowedPlaylists();
+                for (Playlist playlist : playlists) {
+                    playlist.decreaseFollowers();
+                }
                 users.remove(user);
                 return "%s was successfully deleted.".formatted(username);
             }
@@ -482,22 +507,22 @@ public final class Admin {
 
         for (Artist artist : artists) {
             if (artist.getUsername().equals(username)) {
-                for(User user : users) {
+                for (User user : users) {
                     String curr = user.lastLoaded;
-                    if(user.getPlayer().getCurrentAudioFile() != null) {
-                        for(Album album : artist.getAlbums()) {
-                            if(album.getName().equals(curr)) {
+                    if (user.getPlayer().getCurrentAudioFile() != null) {
+                        for (Album album : artist.getAlbums()) {
+                            if (album.getName().equals(curr)) {
                                 return "%s can't be deleted.".formatted(username);
                             }
-                            for(Song song : album.getSongs()) {
-                                if(song.getName().equals(curr)) {
+                            for (Song song : album.getSongs()) {
+                                if (song.getName().equals(curr)) {
                                     return "%s can't be deleted.".formatted(username);
                                 }
                             }
                         }
                     }
-                    if(user.getPage().equals(username)) {
-                        user.setPage("Home");
+                    if (user.getPage().equals(username)) {
+                        return "%s can't be deleted.".formatted(username);
                     }
                     Iterator<Song> iterator = user.getLikedSongs().iterator();
                     while (iterator.hasNext()) {
@@ -507,8 +532,8 @@ public final class Admin {
                         }
                     }
                     List<Song> list = Admin.getSongs();
-                    for(Song song : list) {
-                        if(song.getArtist().equals(username)) {
+                    for (Song song : list) {
+                        if (song.getArtist().equals(username)) {
                             Admin.removeSong(song.getName());
                         }
                     }
@@ -519,8 +544,26 @@ public final class Admin {
         }
         for (Host host : hosts) {
             if (host.getUsername().equals(username)) {
+                for (User user : users) {
+                    String curr = user.lastLoaded;
+                    if (user.getPlayer().getCurrentAudioFile() != null) {
+                        for (Podcast podcast : host.getPodcasts()) {
+                            if (podcast.getName().equals(curr)) {
+                                return "%s can't be deleted.".formatted(username);
+                            }
+                            for (Episode episode : podcast.getEpisodes()) {
+                                if (episode.getName().equals(curr)) {
+                                    return "%s can't be deleted.".formatted(username);
+                                }
+                            }
+                        }
+                    }
+                    if (user.getPage().equals(username)) {
+                        return "%s can't be deleted.".formatted(username);
+                    }
+                }
                 hosts.remove(host);
-                return "The username %s has been removed successfully.".formatted(username);
+                return "%s was successfully deleted.".formatted(username);
             }
         }
         return "The username %s doesn't exist.".formatted(username);
@@ -577,13 +620,28 @@ public final class Admin {
                 for(User user : users) {
                     String curr = user.lastLoaded;
                     if(user.getPlayer().getCurrentAudioFile() != null) {
-                        for(Album album : artist.getAlbums()) {
-                            if(album.getName().equals(curr)) {
+                        Album currAlbum = artist.getAlbumByName(albumName);
+                        if(currAlbum != null) {
+                            if(currAlbum.getName().equals(user.getPlayer().getCurrentAudioFile().getName())) {
                                 return "%s can't delete this album.".formatted(username);
                             }
-                            for(Song song : album.getSongs()) {
-                                if(song.getName().equals(curr)) {
+                            for(Song song : currAlbum.getSongs()) {
+                                if(song.getName().equals(user.getPlayer().getCurrentAudioFile().getName())) {
                                     return "%s can't delete this album.".formatted(username);
+                                }
+                            }
+                        } else {
+                            return "%s doesn't have an album with the given name.".formatted(username);
+                        }
+                        List <Playlist> playlists = user.getPlaylists();
+                        for(Playlist playlist : playlists) {
+                            if(curr.equals(playlist.getName())) {
+                                for(Song song : playlist.getSongs()) {
+                                    for(Song song1 : currAlbum.getSongs()) {
+                                        if(song.getName().equals(song1.getName())) {
+                                            return "%s can't delete this album.".formatted(username);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -601,6 +659,16 @@ public final class Admin {
                             Admin.removeSong(song.getName());
                         }
                     }
+                    List<Playlist> playlists = user.getPlaylists();
+                    for(Playlist playlist : playlists) {
+                        Iterator<Song> iterator1 = playlist.getSongs().iterator();
+                        while (iterator1.hasNext()) {
+                            Song song = iterator1.next();
+                            if (song.getAlbum().equals(albumName)) {
+                                iterator1.remove();
+                            }
+                        }
+                    }
                 }
                 for(Album album : artist.getAlbums()) {
                     if(album.getName().equals(albumName)) {
@@ -608,7 +676,49 @@ public final class Admin {
                         return "%s deleted the album successfully.".formatted(username);
                     }
                 }
-                return "%s doesn't have an album with the given name.".formatted(username);
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
+    }
+
+    public static String removePodcast(String username, String podcastName) {
+
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+
+        for (Artist artist : artists) {
+            if (artist.getUsername().equals(username)) {
+                return "%s is not a host.".formatted(username);
+            }
+        }
+
+        for (Host host : hosts) {
+            if (host.getUsername().equals(username)) {
+                for(User user : users) {
+                    String curr = user.lastLoaded;
+                    if(user.getPlayer().getCurrentAudioFile() != null) {
+                        for(Podcast podcast : host.getPodcasts()) {
+                            if(podcast.getName().equals(curr)) {
+                                return "%s can't delete this podcast.".formatted(username);
+                            }
+                            for(Episode episode : podcast.getEpisodes()) {
+                                if(episode.getName().equals(curr)) {
+                                    return "%s can't delete this podcast.".formatted(username);
+                                }
+                            }
+                        }
+                    }
+                }
+                for(Podcast podcast : host.getPodcasts()) {
+                    if(podcast.getName().equals(podcastName)) {
+                        host.getPodcasts().remove(podcast);
+                        return "%s deleted the podcast successfully.".formatted(username);
+                    }
+                }
+                return "%s doesn't have a podcast with the given name.".formatted(username);
             }
         }
         return "The username %s doesn't exist.".formatted(username);
