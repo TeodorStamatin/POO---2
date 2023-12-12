@@ -13,6 +13,8 @@ import app.searchBar.SearchBar;
 import app.searchBar.SearchBarPage;
 import app.utils.Enums;
 import lombok.Getter;
+
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import app.audio.Collections.Album;
 import app.Admin;
@@ -288,11 +290,12 @@ public class User {
             return "Please load a source before liking or unliking.";
         }
 
-        if (!player.getType().equals("song") && !player.getType().equals("playlist")) {
+        if (!player.getType().equals("song") && !player.getType().equals("playlist") && !player.getType().equals("album")) {
             return "Loaded source is not a song.";
         }
 
         Song song = (Song) player.getCurrentAudioFile();
+        //System.out.println(song.getName());
 
         if (likedSongs.contains(song)) {
             likedSongs.remove(song);
@@ -300,10 +303,16 @@ public class User {
 
             return "Unlike registered successfully.";
         }
-
-        likedSongs.add(song);
+        ArrayList<Song> likedSongsCopy = new ArrayList<>();
+        for(Song song1 : likedSongs) {
+            likedSongsCopy.add(song1);
+            //System.out.println(song1.getName());
+        }
+        likedSongsCopy.add(song);
+        likedSongs = likedSongsCopy;
         song.like();
         return "Like registered successfully.";
+
     }
 
     /**
@@ -543,7 +552,7 @@ public class User {
 
         switch (page) {
             case "Home" -> {
-                output.append("Liked songs:\n\t[").append(likedSongsToString()).append("]\n\n");
+                output.append("Liked songs:\n\t[").append(topLikedSongsToString()).append("]\n\n");
                 output.append("Followed playlists:\n\t[").append(followedPlaylistsToString()).append("]");
             }
             case "LikedContent" -> {
@@ -579,6 +588,26 @@ public class User {
         }
 
         return output.toString();
+    }
+
+    private String topLikedSongsToString() {
+        List<Song> sortedLikedSongs = new ArrayList<>(likedSongs);
+        sortedLikedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed());
+
+        return sortedLikedSongs.stream()
+                .limit(5)
+                .map(Song::getName)
+                .collect(Collectors.joining(", "));
+    }
+
+    private String topLikedSongsDetailsToString() {
+        List<Song> sortedLikedSongs = new ArrayList<>(likedSongs);
+        sortedLikedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed());
+
+        return sortedLikedSongs.stream()
+                .limit(5)
+                .map(song -> song.getName() + " - " + song.getArtist())
+                .collect(Collectors.joining(", "));
     }
 
     private String likedSongsToString() {

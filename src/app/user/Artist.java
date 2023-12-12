@@ -40,6 +40,9 @@ public class Artist {
         this.albums = new ArrayList<>();
     }
 
+    public String getName() {
+        return this.username;
+    }
     public List<Event> getEvents() {
         return events;
     }
@@ -112,7 +115,6 @@ public class Artist {
         try {
             Date parsedDate = dateFormat.parse(date);
 
-            // Additional checks for day, month, and year
             int day = Integer.parseInt(date.substring(0, 2));
             int month = Integer.parseInt(date.substring(3, 5));
             int year = Integer.parseInt(date.substring(6));
@@ -121,14 +123,12 @@ public class Artist {
                 return false;
             }
 
-            // Check for February
             if (month == 2 && day > 28) {
                 return false;
             }
 
             return true;
         } catch (ParseException | NumberFormatException e) {
-            // Parsing failed or conversion to integer failed
             return false;
         }
     }

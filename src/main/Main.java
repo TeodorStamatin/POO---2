@@ -130,6 +130,7 @@ public final class Main {
                 case "removePodcast" -> outputs.add(CommandRunner.removePodcast(command));
                 case "removeEvent" -> outputs.add(CommandRunner.removeEvent(command));
                 case "getTop5Albums" -> outputs.add(CommandRunner.getTop5Albums(command));
+                case "getTop5Artists" -> outputs.add(CommandRunner.getTop5Artists(command));
                 default -> System.out.println("Invalid command " + commandName);
             }
         }

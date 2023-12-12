@@ -1,6 +1,7 @@
 package app;
 
 import app.audio.Collections.PlaylistOutput;
+import app.audio.Files.Song;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.user.User;
@@ -202,7 +203,12 @@ public final class CommandRunner {
 
         String message;
         if(user.connectionStatus) {
+            System.out.println(user.getUsername());
             message = user.like();
+            for(Song songa : user.getLikedSongs()) {
+                System.out.println(songa.getName());
+            }
+            System.out.println(user.getLikedSongs().size()+"\n");
         }
         else {
             message = "%s is offline.".formatted(commandInput.getUsername());
@@ -448,18 +454,8 @@ public final class CommandRunner {
      * @param commandInput the command input
      */
     public static ObjectNode switchConnectionStatus(final CommandInput commandInput) {
-        User user = Admin.getUser(commandInput.getUsername());
 
-        if(user == null) {
-            ObjectNode objectNode = objectMapper.createObjectNode();
-            objectNode.put("command", commandInput.getCommand());
-            objectNode.put("user", commandInput.getUsername());
-            objectNode.put("timestamp", commandInput.getTimestamp());
-            objectNode.put("message", "The username %s doesn't exist.".formatted(commandInput.getUsername()));
-            return objectNode;
-        }
-
-        String message = user.switchConnectionStatus();
+        String message = Admin.switchConnection(commandInput.getUsername());
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
@@ -756,6 +752,17 @@ public final class CommandRunner {
 
     public static ObjectNode getTop5Albums(final CommandInput commandInput) {
         List<String> songs = Admin.getTop5Albums();
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("result", objectMapper.valueToTree(songs));
+
+        return objectNode;
+    }
+
+    public static ObjectNode getTop5Artists(final CommandInput commandInput) {
+        List<String> songs = Admin.getTop5Artists();
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());

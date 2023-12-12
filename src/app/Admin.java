@@ -134,6 +134,25 @@ public final class Admin {
         return null;
     }
 
+    public static String switchConnection(final String username) {
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return user.switchConnectionStatus();
+            }
+        }
+        for(Artist artist : artists) {
+            if (artist.getUsername().equals(username)) {
+                return "%s is not a normal user.".formatted(username);
+            }
+        }
+        for(Host host : hosts) {
+            if (host.getUsername().equals(username)) {
+                return "%s is not a normal user.".formatted(username);
+            }
+        }
+        return "The username %s doesn't exist.".formatted(username);
+    }
+
     /**
      * Update timestamp.
      *
@@ -208,6 +227,23 @@ public final class Admin {
                 .collect(Collectors.toList());
 
         return topAlbums;
+    }
+
+    public static List<String> getTop5Artists() {
+        List<Artist> allArtists = new ArrayList<>(artists);
+
+        Collections.sort(allArtists, Comparator
+                .<Artist, Integer>comparing(artist -> artist.getAlbums().stream().flatMap(album -> album.getSongs().stream())
+                        .mapToInt(Song::getLikes).sum())
+                .reversed()
+                .thenComparing(Artist::getName));
+
+        List<String> topArtists = allArtists.stream()
+                .limit(5)
+                .map(Artist::getName)
+                .collect(Collectors.toList());
+
+        return topArtists;
     }
 
     public static List<String> getOnlineUsers() {
@@ -307,7 +343,6 @@ public final class Admin {
                 if(artist.albumExists(albumName)) {
                     return "%s has another album with the same name.".formatted(username);
                 }
-                artist.addAlbum(album);
                 List<SongInput> songInputList = commandInput.getSongs();
                 for (SongInput songInput : songInputList) {
                     Song new_song = new Song(songInput.getName(), songInput.getDuration(),
@@ -317,7 +352,11 @@ public final class Admin {
                         return "%s has the same song at least twice in this album.".formatted(username);
                     }
                     album.addSong(new_song);
-                    songs.add(new_song);
+                }
+                artist.addAlbum(album);
+                List<Song> tmp = album.getSongs();
+                for (Song song : tmp) {
+                    songs.add(song);
                 }
                 return "%s has added new album successfully.".formatted(username);
             }
@@ -325,12 +364,12 @@ public final class Admin {
 
         for (Host host : hosts) {
             if (host.getUsername().equals(username)) {
-                return "%s is not an artist".formatted(username);
+                return "%s is not an artist.".formatted(username);
             }
         }
         for (User user : users) {
             if (user.getUsername().equals(username)) {
-                return "%s is not an artist".formatted(username);
+                return "%s is not an artist.".formatted(username);
             }
         }
         return "The username %s doesn't exist.".formatted(username);
@@ -555,12 +594,26 @@ public final class Admin {
                                     return "%s can't be deleted.".formatted(username);
                                 }
                             }
+                            List<Playlist> playlists = user.getFollowedPlaylists();
+                            for(Playlist playlist : playlists) {
+                                if(playlist.getName().equals(curr)) {
+                                    for(Song song : playlist.getSongs()) {
+                                        if(user.getPlayer().getCurrentAudioFile() != null) {
+                                            if(song.getName().equals(user.getPlayer().getCurrentAudioFile().getName())) {
+                                                return "%s can't be deleted.".formatted(username);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     if (user.getPage().equals(username)) {
                         return "%s can't be deleted.".formatted(username);
                     }
-                    Iterator<Song> iterator = user.getLikedSongs().iterator();
+                }
+                for(User user1 : users) {
+                    Iterator<Song> iterator = user1.getLikedSongs().iterator();
                     while (iterator.hasNext()) {
                         Song song = iterator.next();
                         if (song.getArtist().equals(username)) {
@@ -573,19 +626,6 @@ public final class Admin {
                             Admin.removeSong(song.getName());
                         }
                     }
-                    List<Playlist> playlists = user.getFollowedPlaylists();
-                    for(Playlist playlist : playlists) {
-                        if(playlist.getName().equals(curr)) {
-                            for(Song song : playlist.getSongs()) {
-                                if(user.getPlayer().getCurrentAudioFile() != null) {
-                                    if(song.getName().equals(user.getPlayer().getCurrentAudioFile().getName())) {
-                                        return "%s can't be deleted.".formatted(username);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                 }
                 artists.remove(artist);
                 return "%s was successfully deleted.".formatted(username);
@@ -695,7 +735,9 @@ public final class Admin {
                             }
                         }
                     }
-                    Iterator<Song> iterator = user.getLikedSongs().iterator();
+                }
+                for(User user1 : users) {
+                    Iterator<Song> iterator = user1.getLikedSongs().iterator();
                     while (iterator.hasNext()) {
                         Song song = iterator.next();
                         if (song.getAlbum().equals(albumName)) {
@@ -708,7 +750,7 @@ public final class Admin {
                             Admin.removeSong(song.getName());
                         }
                     }
-                    List<Playlist> playlists = user.getPlaylists();
+                    List<Playlist> playlists = user1.getPlaylists();
                     for(Playlist playlist : playlists) {
                         Iterator<Song> iterator1 = playlist.getSongs().iterator();
                         while (iterator1.hasNext()) {
