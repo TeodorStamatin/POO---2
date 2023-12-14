@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GetAllUsers implements GetAllUsersStrategy {
+
+    /**
+     *
+     * @return
+     */
     @Override
     public List<String> getAllUsers() {
         return Admin.getUsers().stream()

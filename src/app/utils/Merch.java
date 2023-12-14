@@ -19,14 +19,26 @@ public class Merch {
         this.price = price;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     *
+     * @return
+     */
     public Integer getPrice() {
         return price;
     }

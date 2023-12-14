@@ -1,13 +1,9 @@
 package app.user;
 
 import app.Admin;
-import app.audio.Collections.Album;
 import app.audio.Collections.Podcast;
 import app.audio.Files.Episode;
-import app.audio.Files.Song;
 import app.utils.Announcement;
-import app.utils.Event;
-import app.utils.Merch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
@@ -18,9 +14,9 @@ import java.util.List;
 public class Host {
     private static ObjectMapper objectMapper = new ObjectMapper();
     @Getter
-    public List<Announcement> announcements = new ArrayList<>();
+    private List<Announcement> announcements = new ArrayList<>();
     @Getter
-    public List<Podcast> podcasts;
+    private List<Podcast> podcasts;
     @Getter
     private String username;
     @Getter
@@ -35,6 +31,11 @@ public class Host {
         this.podcasts = new ArrayList<>();
     }
 
+    /**
+     *
+     * @param podcastName
+     * @return
+     */
     public boolean podcastExists(final String podcastName) {
         for (Podcast podcast : podcasts) {
             if (podcast.getName().equals(podcastName)) {
@@ -44,6 +45,12 @@ public class Host {
         return false;
     }
 
+    /**
+     *
+     * @param name
+     * @param description
+     * @return
+     */
     public String addAnnouncement(final String name, final String description) {
 
         for (Announcement announcement : this.getAnnouncements()) {
@@ -57,6 +64,11 @@ public class Host {
         return "%s has successfully added new announcement.".formatted(this.username);
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     public String removeAnnouncement(final String name) {
         for (Announcement announcement : this.getAnnouncements()) {
             if (announcement.getName().equals(name)) {
@@ -67,15 +79,20 @@ public class Host {
         return "%s has no announcement with the given name.".formatted(this.username);
     }
 
+    /**
+     *
+     * @param username
+     * @return
+     */
     public List<ObjectNode> showPodcasts(final String username) {
         List<ObjectNode> results = new ArrayList<>();
         for (Host host : Admin.getHosts()) {
             if (host.getUsername().equals(username)) {
-                for(Podcast podcast : host.getPodcasts()) {
+                for (Podcast podcast : host.getPodcasts()) {
                     ObjectNode albumNode = objectMapper.createObjectNode();
                     albumNode.put("name", podcast.getName());
                     List<String> episodes = new ArrayList<>();
-                    for(Episode episode : podcast.getEpisodes()) {
+                    for (Episode episode : podcast.getEpisodes()) {
                         episodes.add(episode.getName());
                     }
                     albumNode.putPOJO("episodes", episodes);
@@ -85,5 +102,4 @@ public class Host {
         }
         return results;
     }
-
 }

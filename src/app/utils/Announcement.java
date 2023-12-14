@@ -12,15 +12,28 @@ public class Announcement {
     public Announcement() {
     }
 
+    /**
+     *
+     * @param name
+     * @param description
+     */
     public Announcement(final String name, final String description) {
         this.name = name;
         this.description = description;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getDescription() {
         return description;
     }

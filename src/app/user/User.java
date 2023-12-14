@@ -89,7 +89,7 @@ public class User {
 
         lastSearched = true;
         ArrayList<String> results = new ArrayList<>();
-        if(type.equals("host") || type.equals("artist")) {
+        if (type.equals("host") || type.equals("artist")) {
             List<String> tmp = searchBarPage.search(filters, type);
 
             for (String string : tmp) {
@@ -118,7 +118,7 @@ public class User {
 
         lastSearched = false;
 
-        if(lastSearchType.equals("host") || lastSearchType.equals("artist")) {
+         if (lastSearchType.equals("host") || lastSearchType.equals("artist")) {
             String selected = searchBarPage.select(itemNumber);
 
             if (selected == null) {
@@ -290,7 +290,8 @@ public class User {
             return "Please load a source before liking or unliking.";
         }
 
-        if (!player.getType().equals("song") && !player.getType().equals("playlist") && !player.getType().equals("album")) {
+        if (!player.getType().equals("song") && !player.getType().equals("playlist")
+                && !player.getType().equals("album")) {
             return "Loaded source is not a song.";
         }
 
@@ -303,7 +304,7 @@ public class User {
             return "Unlike registered successfully.";
         }
         ArrayList<Song> likedSongsCopy = new ArrayList<>();
-        for(Song song1 : likedSongs) {
+        for (Song song1 : likedSongs) {
             likedSongsCopy.add(song1);
         }
         likedSongsCopy.add(song);
@@ -528,14 +529,23 @@ public class User {
         player.simulatePlayer(time);
     }
 
+    /**
+     *
+     * @return
+     */
     public String switchConnectionStatus() {
         connectionStatus = !connectionStatus;
         return "%s has changed status successfully." .formatted(username);
     }
 
+    /**
+     *
+     * @param page
+     * @return
+     */
     public String changePage(final String page) {
         try {
-            Page newPage = changePageFactory.createPage(page, username);
+            Page newPage = ChangePageFactory.createPage(page, username);
             this.page = page;
             return newPage.accessPage(username);
         } catch (IllegalArgumentException e) {
@@ -543,17 +553,24 @@ public class User {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public String printCurrentPage() {
         StringBuilder output = new StringBuilder();
 
         switch (page) {
             case "Home" -> {
                 output.append("Liked songs:\n\t[").append(topLikedSongsToString()).append("]\n\n");
-                output.append("Followed playlists:\n\t[").append(followedPlaylistsToString()).append("]");
+                output.append("Followed playlists:\n\t[").
+                        append(followedPlaylistsToString()).append("]");
             }
             case "LikedContent" -> {
-                output.append("Liked songs:\n\t[").append(likedSongsDetailsToString()).append("]\n\n");
-                output.append("Followed playlists:\n\t[").append(followedPlaylistsDetailsToString()).append("]");
+                output.append("Liked songs:\n\t[").
+                        append(likedSongsDetailsToString()).append("]\n\n");
+                output.append("Followed playlists:\n\t[").
+                        append(followedPlaylistsDetailsToString()).append("]");
             }
             default -> {
                 for (Artist artist : Admin.getArtists()) {
@@ -575,7 +592,8 @@ public class User {
                         String announcementsDetailsString = announcementsDetailsToString(host);
 
                         output.append("Podcasts:\n\t[").append(podcastsString).append("]\n\n");
-                        output.append("Announcements:\n\t[").append(announcementsDetailsString).append("]");
+                        output.append("Announcements:\n\t[").
+                                append(announcementsDetailsString).append("]");
 
                         break;
                     }
@@ -586,6 +604,10 @@ public class User {
         return output.toString();
     }
 
+    /**
+     *
+     * @return
+     */
     private String topLikedSongsToString() {
         List<Song> sortedLikedSongs = new ArrayList<>(likedSongs);
         sortedLikedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed());
@@ -596,54 +618,95 @@ public class User {
                 .collect(Collectors.joining(", "));
     }
 
+    /**
+     *
+     * @return
+     */
     private String likedSongsDetailsToString() {
         return likedSongs.stream()
                 .map(song -> song.getName() + " - " + song.getArtist())
                 .collect(Collectors.joining(", "));
     }
 
+    /**
+     *
+     * @return
+     */
     private String followedPlaylistsToString() {
         return followedPlaylists.stream()
                 .map(Playlist::getName)
                 .collect(Collectors.joining(", "));
     }
 
+    /**
+     *
+     * @return
+     */
     private String followedPlaylistsDetailsToString() {
         return followedPlaylists.stream()
                 .map(playlist -> playlist.getName() + " - " + playlist.getOwner())
                 .collect(Collectors.joining(", "));
     }
 
-    private String albumsToString(Artist artist) {
+    /**
+     *
+     * @param artist
+     * @return
+     */
+    private String albumsToString(final Artist artist) {
         return artist.getAlbums().stream()
                 .map(Album::getName)
                 .collect(Collectors.joining(", "));
     }
 
-    private String merchDetailsToString(Artist artist) {
+    /**
+     *
+     * @param artist
+     * @return
+     */
+    private String merchDetailsToString(final Artist artist) {
         return artist.getMerch().stream()
-                .map(merchandise -> merchandise.getName() + " - " + merchandise.getPrice() + ":\n\t" + merchandise.getDescription())
+                .map(merchandise -> merchandise.getName() + " - "
+                        + merchandise.getPrice() + ":\n\t" + merchandise.getDescription())
                 .collect(Collectors.joining(", "));
     }
 
-    private String eventDetailsToString(Artist artist) {
+    /**
+     *
+     * @param artist
+     * @return
+     */
+    private String eventDetailsToString(final Artist artist) {
         return artist.getEvents().stream()
-                .map(event -> event.getName() + " - " + event.getDate() + ":\n\t" + event.getDescription())
+                .map(event -> event.getName() + " - " + event.getDate()
+                        + ":\n\t" + event.getDescription())
                 .collect(Collectors.joining(", "));
     }
 
-    private String podcastsToString(Host host) {
+    /**
+     *
+     * @param host
+     * @return
+     */
+    private String podcastsToString(final Host host) {
         return host.getPodcasts().stream()
-                .map(podcast -> podcast.getName() + ":\n\t[" +
-                        podcast.getEpisodes().stream()
-                                .map(episode -> episode.getName() + " - " + episode.getDescription())
+                .map(podcast -> podcast.getName() + ":\n\t["
+                        + podcast.getEpisodes().stream()
+                                .map(episode -> episode.getName() + " - "
+                                        + episode.getDescription())
                                 .collect(Collectors.joining(", ")) + "]\n")
                 .collect(Collectors.joining(", "));
     }
 
-    private String announcementsDetailsToString(Host host) {
+    /**
+     *
+     * @param host
+     * @return
+     */
+    private String announcementsDetailsToString(final Host host) {
         return host.getAnnouncements().stream()
-                .map(announcement -> announcement.getName() + ":\n\t" + announcement.getDescription() + "\n")
+                .map(announcement -> announcement.getName() + ":\n\t"
+                        + announcement.getDescription() + "\n")
                 .collect(Collectors.joining(", "));
     }
 

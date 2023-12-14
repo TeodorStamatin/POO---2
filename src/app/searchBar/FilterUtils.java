@@ -150,6 +150,12 @@ public final class FilterUtils {
         return result;
     }
 
+    /**
+     *
+     * @param entries
+     * @param user
+     * @return
+     */
     public static List<LibraryEntry> filterByDescription(final List<LibraryEntry> entries,
                                                                 final String user) {
         return filter(entries, entry -> entry.isVisibleToUser(user));

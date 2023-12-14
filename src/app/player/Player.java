@@ -126,8 +126,8 @@ public final class Player {
             source.generateShuffleOrder(seed);
         }
 
-        if (source.getType() == Enums.PlayerSourceType.PLAYLIST ||
-                source.getType() == Enums.PlayerSourceType.ALBUM) {
+        if (source.getType() == Enums.PlayerSourceType.PLAYLIST
+                || source.getType() == Enums.PlayerSourceType.ALBUM) {
             shuffle = !shuffle;
             if (shuffle) {
                 source.updateShuffleIndex();
@@ -170,7 +170,7 @@ public final class Player {
     public void simulatePlayer(final int time) {
         int elapsedTime = time;
         if (!paused) {
-            if(source != null) {
+            if (source != null) {
                 while (elapsedTime >= source.getDuration()) {
                     elapsedTime -= source.getDuration();
                     next();

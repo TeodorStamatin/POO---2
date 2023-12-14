@@ -18,3 +18,5 @@
 * ref/ - contains all reference output for the tests in JSON format
 
 <div align="center"><img src="https://tenor.com/view/homework-time-gif-24854817.gif" width="500px"></div>
+
+am folosit solutia oficiala

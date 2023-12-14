@@ -1,7 +1,6 @@
 package app.searchBar;
 
 import app.Admin;
-import app.audio.LibraryEntry;
 import app.user.Artist;
 import app.user.Host;
 import lombok.Getter;
@@ -20,16 +19,21 @@ public final class SearchBarPage {
     @Getter
     private String lastSelected;
 
+    /**
+     *
+     * @param user
+     */
     public SearchBarPage(final String user) {
         this.results = new ArrayList<>();
         this.user = user;
     }
 
-    public void clearSelection() {
-        lastSelected = null;
-        lastSearchType = null;
-    }
-
+    /**
+     *
+     * @param filters
+     * @param type
+     * @return
+     */
     public List<String> search(final Filters filters, final String type) {
         List<String> entries;
 
@@ -73,6 +77,11 @@ public final class SearchBarPage {
         return this.results;
     }
 
+    /**
+     *
+     * @param itemNumber
+     * @return
+     */
     public String select(final Integer itemNumber) {
         if (this.results.size() < itemNumber) {
             results.clear();

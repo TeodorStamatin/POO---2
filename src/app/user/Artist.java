@@ -1,7 +1,6 @@
 package app.user;
 
 import app.Admin;
-import app.utils.Announcement;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,6 +9,7 @@ import app.utils.Merch;
 import app.utils.Event;
 import lombok.Getter;
 import app.audio.Files.Song;
+import lombok.Setter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,8 +22,12 @@ public class Artist {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public List<Merch> merch = new ArrayList<>();
-    public List<Event> events = new ArrayList<>();
+    @Getter
+    @Setter
+    private List<Merch> merch = new ArrayList<>();
+    @Getter
+    @Setter
+    private List<Event> events = new ArrayList<>();
     @Getter
     private String username;
     @Getter
@@ -40,21 +44,26 @@ public class Artist {
         this.albums = new ArrayList<>();
     }
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return this.username;
     }
-    public List<Event> getEvents() {
-        return events;
-    }
-
-    public List<Merch> getMerch() {
-        return merch;
-    }
-
+    /**
+     *
+     * @param album
+     */
     public void addAlbum(final Album album) {
         this.albums.add(album);
     }
 
+    /**
+     *
+     * @param albumName
+     * @return
+     */
     public boolean albumExists(final String albumName) {
         for (Album album : this.albums) {
             if (album.getName().equals(albumName)) {
@@ -64,15 +73,20 @@ public class Artist {
         return false;
     }
 
+    /**
+     *
+     * @param username
+     * @return
+     */
     public List<ObjectNode> showAlbums(final String username) {
         List<ObjectNode> results = new ArrayList<>();
         for (Artist artist : Admin.getArtists()) {
             if (artist.getUsername().equals(username)) {
-                for(Album album : artist.getAlbums()) {
+                for (Album album : artist.getAlbums()) {
                     ObjectNode albumNode = objectMapper.createObjectNode();
                     albumNode.put("name", album.getName());
                     List<String> songs = new ArrayList<>();
-                    for(Song song : album.getSongs()) {
+                    for (Song song : album.getSongs()) {
                         songs.add(song.getName());
                     }
                     albumNode.putPOJO("songs", songs);
@@ -83,6 +97,11 @@ public class Artist {
         return results;
     }
 
+    /**
+     *
+     * @param albumName
+     * @return
+     */
     public Album getAlbumByName(final String albumName) {
         for (Album album : this.albums) {
             if (album.getName().equals(albumName)) {
@@ -92,8 +111,15 @@ public class Artist {
         return null;
     }
 
+    /**
+     *
+     * @param name
+     * @param date
+     * @param description
+     * @return
+     */
     public String addEvent(final String name, final String date, final String description) {
-        if(!validDate(date)) {
+        if (!validDate(date)) {
             return "Event for %s does not have a valid date.".formatted(this.username);
         }
 
@@ -108,9 +134,14 @@ public class Artist {
         return "%s has added new event successfully.".formatted(this.username);
     }
 
-    private boolean validDate(String date) {
+    /**
+     *
+     * @param date
+     * @return
+     */
+    private boolean validDate(final String date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
-        dateFormat.setLenient(false);  // Disable lenient parsing to enforce strict validation
+        dateFormat.setLenient(false);
 
         try {
             Date parsedDate = dateFormat.parse(date);
@@ -133,6 +164,11 @@ public class Artist {
         }
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     public String removeEvent(final String name) {
         for (Event event : this.getEvents()) {
             if (event.getName().equals(name)) {
@@ -143,8 +179,15 @@ public class Artist {
         return "%s doesn't have an event with the given name.".formatted(this.username);
     }
 
+    /**
+     *
+     * @param name
+     * @param price
+     * @param description
+     * @return
+     */
     public String addMerch(final String name, final Integer price, final String description) {
-        if(price < 0) {
+        if (price < 0) {
             return "Price for merchandise can not be negative.";
         }
 
