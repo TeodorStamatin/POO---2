@@ -295,7 +295,6 @@ public class User {
         }
 
         Song song = (Song) player.getCurrentAudioFile();
-        //System.out.println(song.getName());
 
         if (likedSongs.contains(song)) {
             likedSongs.remove(song);
@@ -306,7 +305,6 @@ public class User {
         ArrayList<Song> likedSongsCopy = new ArrayList<>();
         for(Song song1 : likedSongs) {
             likedSongsCopy.add(song1);
-            //System.out.println(song1.getName());
         }
         likedSongsCopy.add(song);
         likedSongs = likedSongsCopy;
@@ -536,13 +534,11 @@ public class User {
     }
 
     public String changePage(final String page) {
-        if(page.equals("Home")) {
+        try {
+            Page newPage = changePageFactory.createPage(page, username);
             this.page = page;
-            return "%s accessed Home successfully.".formatted(username);
-        } else if(page.equals("LikedContent")) {
-            this.page = page;
-            return "%s accessed LikedContent successfully.".formatted(username);
-        } else {
+            return newPage.accessPage(username);
+        } catch (IllegalArgumentException e) {
             return "%s is trying to access a non-existent page.".formatted(username);
         }
     }
@@ -597,22 +593,6 @@ public class User {
         return sortedLikedSongs.stream()
                 .limit(5)
                 .map(Song::getName)
-                .collect(Collectors.joining(", "));
-    }
-
-    private String topLikedSongsDetailsToString() {
-        List<Song> sortedLikedSongs = new ArrayList<>(likedSongs);
-        sortedLikedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed());
-
-        return sortedLikedSongs.stream()
-                .limit(5)
-                .map(song -> song.getName() + " - " + song.getArtist())
-                .collect(Collectors.joining(", "));
-    }
-
-    private String likedSongsToString() {
-        return likedSongs.stream()
-                .map(AudioFile::getName)
                 .collect(Collectors.joining(", "));
     }
 

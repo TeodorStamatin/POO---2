@@ -203,12 +203,7 @@ public final class CommandRunner {
 
         String message;
         if(user.connectionStatus) {
-            System.out.println(user.getUsername());
             message = user.like();
-            for(Song songa : user.getLikedSongs()) {
-                System.out.println(songa.getName());
-            }
-            System.out.println(user.getLikedSongs().size()+"\n");
         }
         else {
             message = "%s is offline.".formatted(commandInput.getUsername());

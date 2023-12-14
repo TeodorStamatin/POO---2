@@ -5,19 +5,14 @@ import app.audio.Collections.Podcast;
 import app.audio.Collections.Album;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;
-import app.player.Player;
-import app.user.Artist;
-import app.user.Host;
-import app.user.User;
+import app.user.*;
+import app.user.getAllUsers.Strategy.*;
 import fileio.input.*;
 import lombok.Getter;
-import lombok.experimental.NonFinal;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import app.audio.Collections.Album;
 
 /**
  * The type Admin.
@@ -534,17 +529,18 @@ public final class Admin {
     }
 
     public static List<String> getAllUsers() {
-        List<String> allUsers = new ArrayList<>();
-        for (User user : users) {
-            allUsers.add(user.getUsername());
-        }
-        for(Artist artist : artists) {
-            allUsers.add(artist.getUsername());
-        }
-        for(Host host : hosts) {
-            allUsers.add(host.getUsername());
-        }
-        return allUsers;
+        GetAllUsersStrategy usersStrategy = new GetAllUsers();
+        GetAllUsersStrategy artistsStrategy = new GetAllArtists();
+        GetAllUsersStrategy hostsStrategy = new GetAllHosts();
+
+        List<GetAllUsersStrategy> strategies = new ArrayList<>();
+        strategies.add(usersStrategy);
+        strategies.add(artistsStrategy);
+        strategies.add(hostsStrategy);
+
+        GetUsers getUsers = new GetUsers(strategies);
+
+        return getUsers.getAllUsers();
     }
 
     public static String deleteUser(String username) {
