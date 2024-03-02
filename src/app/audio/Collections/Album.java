@@ -12,7 +12,6 @@ public class Album extends AudioCollection {
     private int releaseYear;
     @Getter
     private String description;
-    @Getter
     private List<Song> songs;
 
     public Album(final String name, final int releaseYear,

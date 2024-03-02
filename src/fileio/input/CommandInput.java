@@ -33,7 +33,6 @@ public final class CommandInput {
     @Getter
     @Setter
     private ArrayList<EpisodeInput> episodes;
-    @Getter
     @Setter
     private String nextPage;
 

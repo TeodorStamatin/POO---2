@@ -14,7 +14,7 @@ class LikedContentPage implements Page {
     }
 }
 
-public class ChangePageFactory {
+abstract class ChangePageFactory {
 
     /**
      *

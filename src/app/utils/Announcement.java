@@ -1,12 +1,8 @@
 package app.utils;
 
-import lombok.Getter;
-
 public class Announcement {
 
-    @Getter
     private String name;
-    @Getter
     private String description;
 
     public Announcement() {

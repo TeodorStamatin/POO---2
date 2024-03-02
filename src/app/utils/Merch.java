@@ -1,13 +1,8 @@
 package app.utils;
 
-import lombok.Getter;
-
 public class Merch {
-    @Getter
     private String name;
-    @Getter
     private String description;
-    @Getter
     private Integer price;
 
     public Merch() {

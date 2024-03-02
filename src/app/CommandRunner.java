@@ -715,7 +715,7 @@ public final class CommandRunner {
     public static ObjectNode getAllUsers(final CommandInput commandInput) {
 
         List<String> results = Admin.getAllUsers();
-
+;
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("timestamp", commandInput.getTimestamp());
